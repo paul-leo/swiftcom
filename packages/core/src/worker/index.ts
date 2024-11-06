@@ -1,80 +1,65 @@
 // 运行在worker 中
-import { remoteMessageType, callbackMessageType } from "../contants/index";
-// import { getPrefetchWorker } from "./preloader-worker";
-/**
- * 消息通信类
- * */
-// 传递消息的统一前缀
-const uniquePrefix = "swifcom:";
-export class Massenger {
-  private methods: {
-    [key: string]: (data: any) => any;
-  } = {};
-  private messageChannel: string;
-  private callbacks: {
-    [key: string]: (data: any) => void;
-  } = {};
+import { remoteMessageType, callbackMessageType } from '../contants/index';
 
-  constructor(messageChannel: string) {
-    // 避免重复初始化
-    this.messageChannel = messageChannel;
-    this.init();
-  }
-
-  private init() {
-    this.listenRemoteCall();
-    this.listenCheck();
-  }
-
-  // 监听远程调用
-  private listenRemoteCall() {
-    self.addEventListener("message", async (event) => {
-      const { type, data } = event.data;
-      const { customData } = data || {};
-      switch (type) {
-        case remoteMessageType:
-          const { funName, callbackId } = data;
-          // 收到信息后执行特定的方法
-          const method = this.methods[funName];
-          if (method) {
-            const methodRes = await method(customData);
-            // 执行完成后触发回调,通知主线程执行结果
-            const client = event.source as Window;
-            client.postMessage({
-              type: callbackMessageType,
-              data: {
-                callbackId,
-                customData: methodRes,
-              },
-            });
-          }
-          break;
-      }
-    });
-  }
-
-  // 监听主线程的检查消息
-  private listenCheck() {
-    self.addEventListener("message", (event) => {
-      const { type, data } = event.data;
-      if (type === `${uniquePrefix}-check:${this.messageChannel}`) {
-        event.source?.postMessage({
-          type: `${uniquePrefix}-check:${this.messageChannel}`,
-          data: data,
+export default class Swifcom {
+    constructor() {
+        Swifcom._init();
+    }
+    private static _isInit = false;
+    private static _init = () => {
+        if (Swifcom._isInit) return;
+        Swifcom._isInit = true;
+        Swifcom._listenRemoteCall();
+    };
+    private static _modules: {
+        [key: string]: Object;
+    } = {};
+    /**
+     * 导出模块
+     * @param obj
+     * @param name
+     */
+    public static export = (obj: Object, name = 'default') => {
+        if(!name) {
+            throw new Error('module name is required');
+        }
+        if (Swifcom._modules[name]) {
+            throw new Error(`module ${name} has been exported`);
+        }
+        if (typeof obj !== 'object') {
+            throw new Error('module must be an object');
+        }
+        this._init();
+        Swifcom._modules[name] = obj;
+    };
+    // 监听远程调用
+    private static _listenRemoteCall() {
+        self.addEventListener('message', async (event) => {
+            const { type, data, port } = event.data;
+            switch (type) {
+                case remoteMessageType:
+                    const { funName, moduleName = 'default' } = data;
+                    const method = (Swifcom._modules as any)?.[moduleName]?.[funName];
+                    if (method) {
+                        const methodRes =
+                            typeof method === 'function'
+                                ? await method(data)
+                                : method;
+                        port.postMessage({
+                            type: callbackMessageType,
+                            data: methodRes,
+                        });
+                    }
+                    else {
+                        port.postMessage({
+                            type: callbackMessageType,
+                            data: {
+                                error: `module ${moduleName} or method ${funName} not found`,
+                            },
+                        });
+                    }
+                    break;
+            }
         });
-      }
-    });
-  }
-
-  // 注册方法，用于远程调用
-  register(name: string, method: any) {
-    this.methods[name] = method;
-  }
-
-  // 取消注册方法，用于远程调用
-  unRegister(name: string) {
-    try {
-      delete this.methods[name];
-    } catch (error) {}
-  }
+    }
 }

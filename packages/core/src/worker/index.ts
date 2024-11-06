@@ -1,7 +1,7 @@
 // 运行在worker 中
 import { remoteMessageType, callbackMessageType } from '../contants/index';
 
-export default class Swifcom {
+export class Swifcom {
     constructor() {
         Swifcom._init();
     }
@@ -62,4 +62,8 @@ export default class Swifcom {
             }
         });
     }
+}
+
+export function swifcomExport(obj: Object, name = 'default') {
+    Swifcom.export(obj, name);
 }

@@ -1,6 +1,6 @@
 {
-  "name": "@norejs/swiftcom",
-  "version": "1.0.0",
+  "name": "swiftcom",
+  "version": "1.0.1",
   "description": "",
   "main": "dist/index.js",
   "scripts": {

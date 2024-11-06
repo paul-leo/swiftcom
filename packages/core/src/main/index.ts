@@ -1,134 +1,128 @@
-import { generateUUID } from "../utils/index";
-import { remoteMessageType, callbackMessageType } from "../contants/index";
-import { createTimeId } from "../utils/index";
-/**
- * 消息通信类
- * */
-const MassengerInstances = new Map();
+import { remoteMessageType, callbackMessageType } from '../contants/index';
+const maxTimeout = 2000;
+let currentWorker: ServiceWorker | null = null;
 
-export type IWorkerStatus = "unfoud" | "actived" | "closed";
-
-export class Massenger {
-  private worker: ServiceWorker | null = null;
-  private messageChannel: string;
-  // 用于存储worker 执行完成后通知主线程的回调
-  private callbacks: {
-    [key: string]: (data: any) => void;
-  } = {};
-  public status: IWorkerStatus = "unfoud";
-  constructor(messageChannel: string) {
-    if (MassengerInstances.has(messageChannel)) {
-      throw new Error("messageChannel is exist");
-    }
-    this.messageChannel = messageChannel;
-    this.init();
-  }
-  // 注册一个回调，返回callbackId，worker 执行完成后通知时带上callbackId
-  private addCallback(callback: (data: any) => any) {
-    const id = generateUUID();
-    this.callbacks[id] = callback;
-    return id;
-  }
-
-  private init() {
-    this.listenCallback();
-    this.listenWorkerStatus();
-  }
-  private listenCallback() {
-    self.addEventListener("message", async (event) => {
-      const { type, data } = event.data;
-      const { customData, callbackId } = data || {};
-      switch (type) {
-        case callbackMessageType:
-          const callback = this.callbacks[callbackId];
-          if (callback) {
-            callback(customData);
-          }
-          try {
-            delete this.callbacks[callbackId];
-          } catch (error) {}
-          break;
-      }
-    });
-  }
-  // 监听Worker 的事件，更新自身状态
-  private listenWorkerStatus() {
-    const handleActiveChange = () => {
-      const activedWorker = navigator?.serviceWorker?.controller;
-      if (activedWorker && this.worker === activedWorker) {
-        return;
-      }
-      if (activedWorker) {
-        this.checkWorker(activedWorker)
-          .then((res) => {
-            this.worker = activedWorker;
-            this.status = "actived";
-          })
-          .catch(() => {
-            this.status = "closed";
-            this.worker = null;
-          });
-      }
-    };
-    handleActiveChange();
-    navigator.serviceWorker.addEventListener(
-      "controllerchange",
-      handleActiveChange
-    );
-  }
-  // 检查worker 是否匹配
-  private async checkWorker(worker: ServiceWorker) {
+export function importModule(moduleName: string) {
     return new Promise((resolve, reject) => {
-      const id = createTimeId();
-      const timer = setTimeout(() => {
-        reject(new Error("check worker timeout"));
-      }, 1000);
-      worker.addEventListener("message", (event) => {
-        const { type, data = {} } = event as MessageEvent;
-        if (
-          type === `swifcom-check:${this.messageChannel}` &&
-          data?.id === id
-        ) {
-          timer && clearTimeout(timer);
-          resolve(true);
+        // 监测当前是否有serviceWorker
+        if (!navigator?.serviceWorker?.controller) {
+            reject(new Error('serviceWorker is not exist'));
         }
-      });
-
-      worker.postMessage({
-        type: `swifcom-check:${this.messageChannel}`,
-        data: { id },
-      });
-    });
-  }
-
-  private callRemote(funName: string, data: any) {
-    return new Promise((resolve, reject) => {
-      if (this.worker) {
-        const callbackId = this.addCallback(resolve);
-        this.worker.postMessage({
-          type: remoteMessageType,
-          data: {
-            funName,
-            data,
-            callbackId,
-          },
-        });
-      } else {
-        reject(new Error("worker is not exist"));
-      }
-    });
-  }
-  /**
-   * 远程对象，用于调用远程对象额放啊发
-   * */
-
-  get remoteInstance() {
-    return new Proxy({} as any, {
-      get: (target, prop) => {
-        return (...data: any[]) => {
-          return this.callRemote(prop.toString(), data);
+        currentWorker = navigator.serviceWorker.controller;
+        const channel = new MessageChannel();
+        const timer = setTimeout(() => {
+            reject(new Error('importModule timeout'));
+        }, maxTimeout);
+        channel.port1.onmessage = (event) => {
+            clearTimeout(timer);
+            const { type, data } = event.data;
+            if (type === 'swifcom-import') {
+                resolve(createProxy(moduleName));
+            } else {
+                reject(new Error('unknow type'));
+            }
         };
-      },
+        currentWorker?.postMessage(
+            {
+                type: 'swifcom-import',
+                data: {
+                    moduleName,
+                },
+            },
+            [channel.port2]
+        );
     });
-  }
+}
+
+function createProxy(moduleName: string) {
+    return new Proxy({} as any, {
+        get: (target, prop) => {
+            return (...params: any[]) => {
+                return getResFromRemote(moduleName, prop.toString(), params);
+            };
+        },
+        set: (target, prop, value) => {
+            throw new Error('can not set value');
+        },
+    });
+}
+
+function getWorker() {
+    // TODO 需要监听当前的serviceWorker是否发生变化
+    if (!navigator?.serviceWorker?.controller) {
+        return null;
+    }
+    if (currentWorker !== navigator.serviceWorker.controller) {
+        return null;
+    }
+    return currentWorker;
+}
+
+function getResFromRemote(moduleName: string, funName: string, params: object) {
+    return new Promise((resolve, reject) => {
+        const channel = new MessageChannel();
+        const timer = setTimeout(() => {
+            reject(new Error('getResFromRemote timeout'));
+        }, maxTimeout);
+        channel.port1.onmessage = (event) => {
+            timer && clearTimeout(timer);
+            const { type, data } = event.data;
+            if (type === callbackMessageType) {
+                const { error, res } = data;
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(res);
+                }
+            } else {
+                reject(new Error('unknow type'));
+            }
+        };
+        getWorker()?.postMessage(
+            {
+                type: remoteMessageType,
+                data: {
+                    funName,
+                    moduleName,
+                    params,
+                },
+            },
+            [channel.port2]
+        );
+    });
+}
+let _sw: ServiceWorkerRegistration | null = null;
+export async function registerSw(swPath: string, scope: string): Promise<void> {
+    if ('serviceWorker' in navigator) {
+        try {
+            _sw = await navigator.serviceWorker.register(swPath, {
+                scope,
+            });
+            console.log('Service Worker registered successfully.');
+
+            // 确保 Service Worker 已激活
+            if (_sw.active) {
+                console.log('Service Worker is already active.');
+            } else {
+                await new Promise<void>((resolve) => {
+                    if (_sw) {
+                        _sw.addEventListener('updatefound', () => {
+                            const newWorker = _sw!.installing;
+                            newWorker?.addEventListener('statechange', () => {
+                                if (newWorker.state === 'activated') {
+                                    console.log('Service Worker activated.');
+                                    resolve();
+                                }
+                            });
+                        });
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Service Worker registration failed:', error);
+            throw error;
+        }
+    } else {
+        throw new Error('Service Workers are not supported in this browser.');
+    }
 }

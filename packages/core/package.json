@@ -19,8 +19,6 @@
     "@types/node": "^20.12.7"
   },
   "dependencies": {
-    "@norejs/prefetch": "workspace:^",
-    "crypto-js": "^4.2.0",
-    "express": "4"
+    "crypto-js": "^4.2.0"
   }
 }

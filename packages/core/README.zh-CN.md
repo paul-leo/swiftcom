@@ -1,22 +1,22 @@
-# Swiftcom 🚀 — Making ServiceWorker Message as Async
+# Swiftcom 🚀 — 让ServiceWorker通信和调用函数一样简单
+[![github](https://img.shields.io/github/stars/paul-leo/swiftcom)]()
 [![npm](https://img.shields.io/npm/v/swiftcom)](https://www.npmjs.com/package/swiftcom)
 [![npm bundle size](https://img.shields.io/bundlephobia/minzip/swiftcom)](https://www.npmjs.com/package/swiftcom)
 ----------------
-[中文](./README.zh-CN.md) | English
+[中文](./README.zh-CN.md) | [English](./README.md)
 
-Swiftcom makes ServiceWorker enjoyable. Swiftcom is a tiny library, that removes the mental barrier of thinking about postMessage and hides the fact that you are working with serviceWorker. It makes the communication between the main thread and service worker as simple as calling a function.
+Swiftcom 让 ServiceWorker 的开发体验变得更加友好。它是一个轻量级库，你无需关心复杂的postMessage，简化了使用 ServiceWorker 时的复杂性。它让主线程和服务工作线程之间的通信变得像调用函数一样简单。
 
-## Features
+## 速览
+[![take a look](https://github.com/paul-leo/swiftcom/raw/main/docs/demo.jpg)](https://github.com/paul-leo/swiftcom)
 
-
-# Let's try it out
-## Installation
+# 快速开始
+## 安装
 ```bash
 npm install swiftcom
 ```
 
-## Usage
-### In ServiceWorker
+### ServiceWorker 代码
 ```javascript
 // @ts-ignore
 import { swifcomExport } from 'swiftcom/dist/worker.js';
@@ -28,8 +28,7 @@ swifcomExport({
 });
 
 ```
-### In Main Thread
-
+### 主进程代码
 ```javascript
 import { importModule, registerSw } from 'swiftcom/dist/main.js';
 
@@ -51,5 +50,4 @@ function initSW() {
 
 initSW();
 ```
-
-Enjoy! 🎉
+如果还可以不放 Star 一下 🎉

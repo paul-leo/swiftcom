@@ -3,7 +3,10 @@
   "version": "1.0.1",
   "description": "",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/main.js",
+  "alias": {
+    "worker": "dist/worker.js"
+  },
   "types": "dist/",
   "scripts": {
     "dev": "rollup -c -w",

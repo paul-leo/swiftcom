@@ -1,7 +1,8 @@
 // @ts-ignore
 import { swifcomExport } from 'swiftcom/dist/worker.js';
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
     console.log('install');
+    // @ts-ignore
     self.skipWaiting();
 });
 

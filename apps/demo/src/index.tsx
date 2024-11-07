@@ -14,17 +14,13 @@ if (rootEl) {
     );
 }
 
-function registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-            await registerSw('/sw.js');
-            try {
-                const objFromSw = await importModule();
-                console.log(await objFromSw.add(1, 2));
-            } catch (error) {
-                console.error(error);
-            }
-        });
+async function registerServiceWorker() {
+    await registerSw('/sw.js');
+    try {
+        const objFromSw = await importModule();
+        console.log(await objFromSw.add(1, 2));
+    } catch (error) {
+        console.error(error);
     }
 }
 registerServiceWorker();

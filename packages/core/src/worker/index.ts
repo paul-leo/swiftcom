@@ -42,6 +42,14 @@ export class Swifcom {
             const port = event.ports[0];
             console.log('message', event);
             switch (type) {
+                case 'swifcom-import':
+                    port.postMessage({
+                        type: 'swifcom-import',
+                        data: {
+                            res: true,
+                        },
+                    });
+                    break;
                 case remoteMessageType:
                     const {
                         funName,

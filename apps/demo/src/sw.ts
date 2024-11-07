@@ -6,7 +6,7 @@ self.addEventListener('install', (event) => {
 });
 
 swifcomExport({
-    test() {
-        return 'test';
+    add(a = 0, b = 0) {
+        return a + b;
     },
 });

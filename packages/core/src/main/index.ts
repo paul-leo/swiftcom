@@ -5,24 +5,27 @@ let currentWorker: ServiceWorker | null = null;
 export function importModule(moduleName: string) {
     return new Promise((resolve, reject) => {
         // 监测当前是否有serviceWorker
-        console.log('navigator', navigator?.serviceWorker);
-        if(navigator?.serviceWorker?.ready){
-          console.log('wait serviceWorker is ready');
-          navigator?.serviceWorker?.ready.then(() => {
-            console.log('serviceWorker is ready');
-            resolve(createProxy(moduleName));
-          });
-          return;
-        }
+        const timer = setTimeout(() => {
+            reject(new Error('importModule timeout'));
+        }, maxTimeout);
+        // 如果serviceWorker已经准备好但是还没有控制页面
+
+        // 如果serviceWorker已经控制页面
         if (!navigator?.serviceWorker?.controller) {
+            // if (navigator?.serviceWorker?.ready) {
+            //     console.log('wait serviceWorker is ready');
+            //     navigator?.serviceWorker?.ready.then(() => {
+            //         timer && clearTimeout(timer);
+            //         importModule(moduleName).then(resolve).catch(reject);
+            //     });
+            //     return;
+            // }
             reject(new Error('serviceWorker is not exist'));
             return;
         }
         currentWorker = navigator.serviceWorker.controller;
+
         const channel = new MessageChannel();
-        const timer = setTimeout(() => {
-            reject(new Error('importModule timeout'));
-        }, maxTimeout);
         channel.port1.onmessage = (event) => {
             clearTimeout(timer);
             const { type, data } = event.data;
@@ -47,11 +50,11 @@ export function importModule(moduleName: string) {
 function createProxy(moduleName: string) {
     return new Proxy({} as any, {
         get: (target, prop) => {
-          if(prop === 'then'){
-            return undefined;
-          }
+            if (prop === 'then') {
+                return undefined;
+            }
             return (...params: any[]) => {
-              console.log('get', prop,moduleName,params);
+                console.log('get', prop, moduleName, params);
                 return getResFromRemote(moduleName, prop.toString(), params);
             };
         },
@@ -63,14 +66,13 @@ function createProxy(moduleName: string) {
 
 function getWorker() {
     // TODO 需要监听当前的serviceWorker是否发生变化
-    // if (!navigator?.serviceWorker?.controller) {
-    //     return null;
-    // }
-    // if (currentWorker !== navigator.serviceWorker.controller) {
-    //     return null;
-    // }
-
-    return navigator.serviceWorker.controller;
+    if (!navigator?.serviceWorker?.controller) {
+        return null;
+    }
+    if (currentWorker !== navigator.serviceWorker.controller) {
+        return null;
+    }
+    return currentWorker;
 }
 
 function getResFromRemote(moduleName: string, funName: string, params: object) {
@@ -93,10 +95,10 @@ function getResFromRemote(moduleName: string, funName: string, params: object) {
                 reject(new Error('unknow type'));
             }
         };
-        if(!navigator.serviceWorker.controller){
-          return reject(new Error('serviceWorker is not exist'));
+        if (!getWorker()) {
+            return reject(new Error('serviceWorker is not exist'));
         }
-        navigator.serviceWorker.controller.postMessage(
+        getWorker()?.postMessage(
             {
                 type: remoteMessageType,
                 data: {
@@ -110,7 +112,10 @@ function getResFromRemote(moduleName: string, funName: string, params: object) {
     });
 }
 let _sw: ServiceWorkerRegistration | null = null;
-export async function registerSw(swPath: string, options:any = {}): Promise<void> {
+export async function registerSw(
+    swPath: string,
+    options: object = {}
+): Promise<void> {
     if ('serviceWorker' in navigator) {
         try {
             _sw = await navigator.serviceWorker.register(swPath, options);

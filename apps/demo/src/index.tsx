@@ -18,10 +18,12 @@ function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
             await registerSw('/sw.js');
-            console.log('Service Worker registered successfully.');
-            const objFromSw = await importModule();
-            console.log(objFromSw);
-            console.log(await objFromSw.test());
+            try {
+                const objFromSw = await importModule();
+                console.log(await objFromSw.add(1, 2));
+            } catch (error) {
+                console.error(error);
+            }
         });
     }
 }

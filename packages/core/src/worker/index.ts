@@ -20,7 +20,7 @@ export class Swifcom {
      * @param name
      */
     public static export = (obj: Object, name = 'default') => {
-        if(!name) {
+        if (!name) {
             throw new Error('module name is required');
         }
         if (Swifcom._modules[name]) {
@@ -29,28 +29,40 @@ export class Swifcom {
         if (typeof obj !== 'object') {
             throw new Error('module must be an object');
         }
-        this._init();
+        Swifcom._init();
         Swifcom._modules[name] = obj;
+        console.log('export', obj);
     };
     // 监听远程调用
     private static _listenRemoteCall() {
+        console.log('listenRemoteCall');
         self.addEventListener('message', async (event) => {
-            const { type, data, port } = event.data;
+            console.log('message', event);
+            const { type, data } = event.data;
+            const port = event.ports[0];
+            console.log('message', event);
             switch (type) {
                 case remoteMessageType:
-                    const { funName, moduleName = 'default' } = data;
-                    const method = (Swifcom._modules as any)?.[moduleName]?.[funName];
+                    const {
+                        funName,
+                        moduleName = 'default',
+                        params = {},
+                    } = data;
+                    const method = (Swifcom._modules as any)?.[moduleName]?.[
+                        funName
+                    ];
                     if (method) {
                         const methodRes =
                             typeof method === 'function'
-                                ? await method(data)
+                                ? await method(...params)
                                 : method;
                         port.postMessage({
                             type: callbackMessageType,
-                            data: methodRes,
+                            data: {
+                                res: methodRes,
+                            },
                         });
-                    }
-                    else {
+                    } else {
                         port.postMessage({
                             type: callbackMessageType,
                             data: {

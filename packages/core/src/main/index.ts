@@ -5,8 +5,18 @@ let currentWorker: ServiceWorker | null = null;
 export function importModule(moduleName: string) {
     return new Promise((resolve, reject) => {
         // 监测当前是否有serviceWorker
+        console.log('navigator', navigator?.serviceWorker);
+        if(navigator?.serviceWorker?.ready){
+          console.log('wait serviceWorker is ready');
+          navigator?.serviceWorker?.ready.then(() => {
+            console.log('serviceWorker is ready');
+            resolve(createProxy(moduleName));
+          });
+          return;
+        }
         if (!navigator?.serviceWorker?.controller) {
             reject(new Error('serviceWorker is not exist'));
+            return;
         }
         currentWorker = navigator.serviceWorker.controller;
         const channel = new MessageChannel();
@@ -37,7 +47,11 @@ export function importModule(moduleName: string) {
 function createProxy(moduleName: string) {
     return new Proxy({} as any, {
         get: (target, prop) => {
+          if(prop === 'then'){
+            return undefined;
+          }
             return (...params: any[]) => {
+              console.log('get', prop,moduleName,params);
                 return getResFromRemote(moduleName, prop.toString(), params);
             };
         },
@@ -49,13 +63,14 @@ function createProxy(moduleName: string) {
 
 function getWorker() {
     // TODO 需要监听当前的serviceWorker是否发生变化
-    if (!navigator?.serviceWorker?.controller) {
-        return null;
-    }
-    if (currentWorker !== navigator.serviceWorker.controller) {
-        return null;
-    }
-    return currentWorker;
+    // if (!navigator?.serviceWorker?.controller) {
+    //     return null;
+    // }
+    // if (currentWorker !== navigator.serviceWorker.controller) {
+    //     return null;
+    // }
+
+    return navigator.serviceWorker.controller;
 }
 
 function getResFromRemote(moduleName: string, funName: string, params: object) {
@@ -78,7 +93,10 @@ function getResFromRemote(moduleName: string, funName: string, params: object) {
                 reject(new Error('unknow type'));
             }
         };
-        getWorker()?.postMessage(
+        if(!navigator.serviceWorker.controller){
+          return reject(new Error('serviceWorker is not exist'));
+        }
+        navigator.serviceWorker.controller.postMessage(
             {
                 type: remoteMessageType,
                 data: {
@@ -92,12 +110,10 @@ function getResFromRemote(moduleName: string, funName: string, params: object) {
     });
 }
 let _sw: ServiceWorkerRegistration | null = null;
-export async function registerSw(swPath: string, scope: string): Promise<void> {
+export async function registerSw(swPath: string, options:any = {}): Promise<void> {
     if ('serviceWorker' in navigator) {
         try {
-            _sw = await navigator.serviceWorker.register(swPath, {
-                scope,
-            });
+            _sw = await navigator.serviceWorker.register(swPath, options);
             console.log('Service Worker registered successfully.');
 
             // 确保 Service Worker 已激活

@@ -36,8 +36,7 @@ export default [
       typescript({
         sourceMap: !production,
         inlineSources: !production
-      }),
-      production && terser()
+      })
     ]
   }
 ];

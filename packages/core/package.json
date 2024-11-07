@@ -1,6 +1,6 @@
 {
   "name": "swiftcom",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "type": "module",
   "main": "dist/main.js",
@@ -13,6 +13,8 @@
     "build": "rollup -c",
     "e2e": "npx playwright test"
   },
+  "registry": "https://registry.npmjs.org/",
+  "repository": "https://github.com/paul-leo/swiftcom",
   "keywords": [],
   "author": "",
   "license": "ISC",

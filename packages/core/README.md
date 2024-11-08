@@ -1,11 +1,14 @@
 # Swiftcom 🚀 — Making ServiceWorker Message as Async
+Swiftcom makes ServiceWorker enjoyable. Swiftcom is a tiny library, that removes the mental barrier of thinking about postMessage and hides the fact that you are working with serviceWorker. It makes the communication between the main thread and service worker as simple as calling a function.
+
+[![license](https://img.shields.io/github/license/paul-leo/swiftcom)]()
 [![github](https://img.shields.io/github/stars/paul-leo/swiftcom)]()
 [![npm](https://img.shields.io/npm/v/swiftcom)](https://www.npmjs.com/package/swiftcom)
 [![npm bundle size](https://img.shields.io/bundlephobia/minzip/swiftcom)](https://www.npmjs.com/package/swiftcom)
 ----------------
 [中文](./README.zh-CN.md) | English
 
-Swiftcom makes ServiceWorker enjoyable. Swiftcom is a tiny library, that removes the mental barrier of thinking about postMessage and hides the fact that you are working with serviceWorker. It makes the communication between the main thread and service worker as simple as calling a function.
+
 
 # Take a look
 [![take a look](https://github.com/paul-leo/swiftcom/raw/main/docs/demo.jpg)](https://github.com/paul-leo/swiftcom)

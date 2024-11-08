@@ -1,11 +1,15 @@
 # Swiftcom 🚀 — 让ServiceWorker通信和调用函数一样简单
+
+Swiftcom 让 ServiceWorker 的开发体验变得更加友好。它是一个轻量级库，你无需关心复杂的postMessage，简化了使用 ServiceWorker 时的复杂性。它让主线程和服务工作线程之间的通信变得像调用函数一样简单。
+
+[![license](https://img.shields.io/github/license/paul-leo/swiftcom)]()
 [![github](https://img.shields.io/github/stars/paul-leo/swiftcom)]()
 [![npm](https://img.shields.io/npm/v/swiftcom)](https://www.npmjs.com/package/swiftcom)
 [![npm bundle size](https://img.shields.io/bundlephobia/minzip/swiftcom)](https://www.npmjs.com/package/swiftcom)
 ----------------
 [中文](./README.zh-CN.md) | [English](./README.md)
 
-Swiftcom 让 ServiceWorker 的开发体验变得更加友好。它是一个轻量级库，你无需关心复杂的postMessage，简化了使用 ServiceWorker 时的复杂性。它让主线程和服务工作线程之间的通信变得像调用函数一样简单。
+
 
 ## 速览
 [![take a look](https://github.com/paul-leo/swiftcom/raw/main/docs/demo.jpg)](https://github.com/paul-leo/swiftcom)

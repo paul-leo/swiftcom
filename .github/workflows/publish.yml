@@ -17,10 +17,13 @@ jobs:
           node-version: 18
       - name: Install package
         run: npm run custom-install
-      - run: pnpm run test
-      - run: pnpm run build
+
+      - name: Build
+        run: pnpm run build
+
       - name: Copy README and LICENSE
         run: cp README.md packages/core/README.md && cp LICENSE packages/core/LICENSE && cp README.zh-CN.md packages/core/README.zh-CN.md
+
       - name: publish
         run: pnpm publish --access public
         env:

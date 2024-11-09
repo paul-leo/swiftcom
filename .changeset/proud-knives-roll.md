@@ -1,0 +1,5 @@
+---
+"swiftcom": major
+---
+
+add ci

@@ -18,5 +18,8 @@
   },
   "keywords": [],
   "author": "paul",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@changesets/cli": "^2.27.9"
+  }
 }

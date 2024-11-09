@@ -1,5 +1,0 @@
----
-"swiftcom": major
----
-
-add ci

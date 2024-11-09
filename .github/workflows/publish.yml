@@ -4,8 +4,8 @@
 name: Node.js Package
 
 on:
-  release:
-    types: [created]
+  push:
+    branches: [ main ]
 
 jobs:
   build:
@@ -15,6 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'pnpm'
       - name: Install package
         run: npm run custom-install
 
@@ -22,12 +23,18 @@ jobs:
         run: pnpm run build
 
       - name: Copy README and LICENSE
-        run: cp README.md packages/core/README.md && cp LICENSE packages/core/LICENSE && cp README.zh-CN.md packages/core/README.zh-CN.md
+        run: cp README.md LICENSE README.zh-CN.md packages/core/
 
-      - name: publish
-        run: pnpm publish --access public
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          # This expects you to have a script called release which does a build for your packages and calls changeset publish
+          publish: pnpm changeset publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
 
   # publish-npm:
   #   needs: build

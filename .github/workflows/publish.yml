@@ -15,8 +15,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
+
+      - name: install pnpm
+        run: npm install -g pnpm@7
+
       - name: Install package
-        run: npm run custom-install
+        run: pnpm install
 
       - name: Build
         run: pnpm run build

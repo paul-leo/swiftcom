@@ -5,7 +5,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "custom-install": "npx pnpm@7 install",
+    "preinstall": "npx only-allow pnpm -y",
+    "test": "cd packages/core && npm run test",
+    "dev": "cd packages/core && npm run dev",
+    "build": "cd packages/core && npm run build"
+  },
+  "packageManager": "pnpm@7.5.0",
+  "engines": {
+    "node": ">=16.0.0",
+    "pnpm": ">=7.0.0"
   },
   "keywords": [],
   "author": "paul",

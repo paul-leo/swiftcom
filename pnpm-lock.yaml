@@ -13,17 +13,17 @@ importers:
       '@types/react-dom': ^18.3.1
       react: ^18.3.1
       react-dom: ^18.3.1
-      swiftcom: workspace:^1.0.1
+      swiftcom: ^1.0.4
       typescript: ^5.6.3
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1_react@18.3.1
+      swiftcom: link:../../packages/core
     devDependencies:
       '@rsbuild/core': 1.0.19
       '@rsbuild/plugin-react': 1.0.6_@rsbuild+core@1.0.19
       '@types/react': 18.3.12
       '@types/react-dom': 18.3.1
-      swiftcom: link:../../packages/core
       typescript: 5.6.3
 
   packages/core:

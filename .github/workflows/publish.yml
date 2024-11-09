@@ -15,18 +15,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-      - name: Install pnpm
-        run: npm run prepare
-      - name: Install dependencies
-        run: pnpm install
+      - name: Install package
+        run: npm run custom-install
       - run: pnpm run test
       - run: pnpm run build
       - name: Copy README and LICENSE
         run: cp README.md packages/core/README.md && cp LICENSE packages/core/LICENSE && cp README.zh-CN.md packages/core/README.zh-CN.md
-      - name: Commit changes
+      - name: publish
         run: pnpm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
   # publish-npm:
   #   needs: build

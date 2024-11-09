@@ -7,14 +7,13 @@
   "scripts": {
     "custom-install": "npx pnpm@7 install",
     "preinstall": "npx only-allow pnpm -y",
-    "test": "cd packages/core && npm run test",
-    "dev": "cd packages/core && npm run dev",
-    "build": "cd packages/core && npm run build"
+    "test": "pnpm --filter swiftcom test",
+    "dev": "pnpm --filter swiftcom dev",
+    "build": "pnpm --filter swiftcom build"
   },
-  "packageManager": "pnpm@7.5.0",
+  "packageManager": "pnpm@7.33.7",
   "engines": {
-    "node": ">=16.0.0",
-    "pnpm": ">=7.0.0"
+    "node": ">=16.0.0"
   },
   "keywords": [],
   "author": "paul",

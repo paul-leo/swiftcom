@@ -10,7 +10,8 @@
     "start-demo": "pnpm --filter demo dev",
     "test": "pnpm --filter swiftcom test",
     "dev": "pnpm --filter swiftcom dev",
-    "build": "pnpm --filter swiftcom build"
+    "build": "pnpm --filter swiftcom build",
+    "postinstall": "npx playwright install"
   },
   "packageManager": "pnpm@7.33.7",
   "engines": {
@@ -20,6 +21,7 @@
   "author": "paul",
   "license": "ISC",
   "devDependencies": {
-    "@changesets/cli": "^2.27.9"
+    "@changesets/cli": "^2.27.9",
+    "playwright": "^1.48.2"
   }
 }

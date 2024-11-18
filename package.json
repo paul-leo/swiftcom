@@ -11,7 +11,7 @@
     "test": "pnpm --filter swiftcom test",
     "dev": "pnpm --filter swiftcom dev",
     "build": "pnpm --filter swiftcom build",
-    "postinstall": "npx playwright install chrome"
+    "postinstall": "npx playwright install chromium"
   },
   "packageManager": "pnpm@7.33.7",
   "engines": {

@@ -8,7 +8,7 @@
     "custom-install": "npx pnpm@7 install",
     "preinstall": "npx only-allow pnpm -y",
     "start-demo": "pnpm --filter demo dev",
-    "test": "pnpm --filter demo start && pnpm --filter swiftcom test",
+    "test": "pnpm --filter swiftcom test",
     "dev": "pnpm --filter swiftcom dev",
     "build": "pnpm --filter swiftcom build"
   },
